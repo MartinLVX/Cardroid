@@ -7,8 +7,8 @@ Launcher para usar una tablet Android como pantalla del auto, pensado para la Re
 - Mapa integrado (MapLibre con mapas de OpenStreetMap vía OpenFreeMap, gratis y sin clave) que sigue tu posición, con botones de acercar, alejar y centrar, y velocidad en km/h.
 - Tarjeta de clima de tu ubicación (Open-Meteo, sin clave).
 - Tarjeta de música con portada de fondo y controles (Spotify, YouTube Music, etc.).
-- Barra inferior con todas las apps, asistente de voz, accesos a CarPlay (DiPlay), Spotify, Waze y Google Maps si están instaladas, Ajustes, hora y batería.
-- Panel derecho con velocímetro por GPS, distancia del viaje, rumbo y botón para abrir CarPlay.
+- Barra inferior con asistente de voz, accesos a Spotify, Waze, Google Maps y YouTube Music si están instaladas, Ajustes, hora y batería.
+- Panel derecho con velocímetro por GPS, distancia del viaje y rumbo.
 - Mantiene la pantalla encendida y oculta las barras del sistema.
 
 ## Instalar en la tablet

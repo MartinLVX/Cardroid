@@ -19,27 +19,20 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.cardroid.launcher.apps.AppEntry
-import com.cardroid.launcher.apps.AppLauncher
 import com.cardroid.launcher.location.LocationTracker
 import com.cardroid.launcher.map.CarMapState
 import com.cardroid.launcher.media.NowPlayingTracker
-import com.cardroid.launcher.ui.AppDrawer
 import com.cardroid.launcher.ui.CardroidTheme
 import com.cardroid.launcher.ui.HomeActions
 import com.cardroid.launcher.ui.HomeScreen
 import com.cardroid.launcher.ui.HomeState
 import com.cardroid.launcher.weather.Weather
 import com.cardroid.launcher.weather.WeatherClient
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 import org.maplibre.android.MapLibre
 
 private const val WEATHER_REFRESH_MS = 15 * 60 * 1000L
@@ -51,7 +44,6 @@ class MainActivity : ComponentActivity() {
 
     /** Bumped every time the home screen comes back, to refresh app lists and icons. */
     private var resumeCount by mutableIntStateOf(0)
-    private var showApps by mutableStateOf(false)
     private var hasLocationPermission by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -106,7 +98,8 @@ class MainActivity : ComponentActivity() {
                     ?.takeIf { it.hasBearing() && speedKmh >= 5 }
                     ?.bearing
 
-                BackHandler { showApps = false }
+                // A launcher must never close on Back.
+                BackHandler { }
 
                 Box(Modifier.fillMaxSize()) {
                     HomeScreen(
@@ -124,23 +117,11 @@ class MainActivity : ComponentActivity() {
                             onPlayPause = media::playPause,
                             onNext = media::next,
                             onPrevious = media::previous,
-                            onOpenApps = { showApps = true },
                             onResetTrip = location::resetTrip,
                             onRequestLocation = requestLocation,
                         ),
                         mapState = mapState,
                     )
-
-                    // Drawn on top so the map keeps running underneath.
-                    if (showApps) {
-                        val iconPx = with(LocalDensity.current) { 72.dp.roundToPx() }
-                        val apps by produceState<List<AppEntry>?>(null, resumeCount) {
-                            value = withContext(Dispatchers.IO) {
-                                AppLauncher.loadApps(applicationContext, iconPx)
-                            }
-                        }
-                        AppDrawer(apps = apps, onClose = { showApps = false })
-                    }
                 }
             }
         }
@@ -164,12 +145,6 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         location.stop()
-    }
-
-    override fun onNewIntent(intent: android.content.Intent) {
-        super.onNewIntent(intent)
-        // Pressing Home while on the launcher returns to the main screen.
-        showApps = false
     }
 
     private fun hideSystemBars() {

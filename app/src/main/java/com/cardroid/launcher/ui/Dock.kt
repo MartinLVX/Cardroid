@@ -43,14 +43,12 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun Dock(refreshKey: Int, onOpenApps: () -> Unit, modifier: Modifier = Modifier) {
+fun Dock(refreshKey: Int, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     Row(
         modifier = modifier.padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        DockIcon(R.drawable.ic_apps, "Todas las apps", onOpenApps)
-        Spacer(Modifier.width(8.dp))
         DockIcon(R.drawable.ic_mic, "Asistente de voz") { AppLauncher.openAssistant(context) }
 
         Row(
@@ -60,7 +58,7 @@ fun Dock(refreshKey: Int, onOpenApps: () -> Unit, modifier: Modifier = Modifier)
         ) {
             for (shortcut in Shortcuts.dock) {
                 val icon = rememberAppIcon(shortcut.packageName, 60, refreshKey)
-                if (icon == null && shortcut.packageName != Shortcuts.DIPLAY) continue
+                if (icon == null) continue
                 Box(
                     modifier = Modifier
                         .size(64.dp)
@@ -68,11 +66,7 @@ fun Dock(refreshKey: Int, onOpenApps: () -> Unit, modifier: Modifier = Modifier)
                         .clickable { AppLauncher.openShortcut(context, shortcut) },
                     contentAlignment = Alignment.Center,
                 ) {
-                    if (icon != null) {
-                        Image(bitmap = icon, contentDescription = shortcut.label, modifier = Modifier.size(56.dp))
-                    } else {
-                        Text(shortcut.label, color = CarColors.TextSecondary, fontSize = 12.sp)
-                    }
+                    Image(bitmap = icon, contentDescription = shortcut.label, modifier = Modifier.size(56.dp))
                 }
             }
             DockIcon(R.drawable.ic_tune, "Ajustes") { AppLauncher.openSettings(context) }

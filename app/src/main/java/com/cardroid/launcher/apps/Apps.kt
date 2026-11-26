@@ -5,17 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.provider.Settings
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.graphics.drawable.toBitmap
-
-data class AppEntry(
-    val label: String,
-    val packageName: String,
-    val icon: ImageBitmap,
-)
 
 /** A big button on the home screen that opens a specific app. */
 data class Shortcut(
@@ -26,14 +19,10 @@ data class Shortcut(
 )
 
 object Shortcuts {
-    const val DIPLAY = "com.shihab.diplay"
     const val SPOTIFY = "com.spotify.music"
 
-    val carPlay = Shortcut("CarPlay", DIPLAY, "https://github.com/shihabal3amri/DiPlay/releases")
-
-    /** Apps in the bottom bar. Missing ones are hidden, except CarPlay. */
+    /** Apps in the bottom bar. Missing ones are hidden. */
     val dock = listOf(
-        carPlay,
         Shortcut("Spotify", SPOTIFY, playStore(SPOTIFY)),
         Shortcut("Waze", "com.waze", playStore("com.waze")),
         Shortcut("Google Maps", "com.google.android.apps.maps", playStore("com.google.android.apps.maps")),
@@ -81,29 +70,6 @@ object AppLauncher {
             .asImageBitmap()
     } catch (e: PackageManager.NameNotFoundException) {
         null
-    }
-
-    /** Every app that shows up in a normal app drawer, sorted by name. */
-    fun loadApps(context: Context, iconSizePx: Int): List<AppEntry> {
-        val pm = context.packageManager
-        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
-        val activities = if (Build.VERSION.SDK_INT >= 33) {
-            pm.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(0))
-        } else {
-            @Suppress("DEPRECATION")
-            pm.queryIntentActivities(intent, 0)
-        }
-        return activities
-            .filter { it.activityInfo.packageName != context.packageName }
-            .distinctBy { it.activityInfo.packageName }
-            .map {
-                AppEntry(
-                    label = it.loadLabel(pm).toString(),
-                    packageName = it.activityInfo.packageName,
-                    icon = it.loadIcon(pm).toBitmap(iconSizePx, iconSizePx).asImageBitmap(),
-                )
-            }
-            .sortedBy { it.label.lowercase() }
     }
 
     private fun start(context: Context, intent: Intent): Boolean = try {

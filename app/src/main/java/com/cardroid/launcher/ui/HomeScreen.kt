@@ -35,7 +35,6 @@ class HomeActions(
     val onPlayPause: () -> Unit,
     val onNext: () -> Unit,
     val onPrevious: () -> Unit,
-    val onOpenApps: () -> Unit,
     val onResetTrip: () -> Unit,
     val onRequestLocation: () -> Unit,
 )
@@ -96,7 +95,6 @@ fun HomeScreen(state: HomeState, actions: HomeActions, mapState: CarMapState) {
             }
             Dock(
                 refreshKey = state.refreshKey,
-                onOpenApps = actions.onOpenApps,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(72.dp),
@@ -107,7 +105,6 @@ fun HomeScreen(state: HomeState, actions: HomeActions, mapState: CarMapState) {
             speedKmh = state.speedKmh,
             tripMeters = state.tripMeters,
             bearing = state.bearing,
-            refreshKey = state.refreshKey,
             onResetTrip = actions.onResetTrip,
             modifier = Modifier
                 .weight(1f)

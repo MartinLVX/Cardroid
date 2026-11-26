@@ -1,7 +1,6 @@
 package com.cardroid.launcher.ui
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,15 +25,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.cardroid.launcher.apps.AppLauncher
-import com.cardroid.launcher.apps.Shortcuts
 import java.util.Locale
 import kotlin.math.cos
 import kotlin.math.min
@@ -49,7 +45,6 @@ fun SidePanel(
     speedKmh: Int,
     tripMeters: Double,
     bearing: Float?,
-    refreshKey: Int,
     onResetTrip: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -87,8 +82,6 @@ fun SidePanel(
                 modifier = Modifier.weight(1f),
             )
         }
-
-        CarPlayCard(refreshKey = refreshKey)
     }
 }
 
@@ -189,41 +182,6 @@ private fun InfoCard(
         )
         if (hint != null) {
             Text(text = hint, color = CarColors.TextSecondary, fontSize = 12.sp)
-        }
-    }
-}
-
-@Composable
-private fun CarPlayCard(refreshKey: Int) {
-    val context = LocalContext.current
-    val shortcut = Shortcuts.carPlay
-    val icon = rememberAppIcon(shortcut.packageName, 56, refreshKey)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(96.dp)
-            .clip(CardShape)
-            .background(CarColors.Surface)
-            .clickable { AppLauncher.openShortcut(context, shortcut) }
-            .padding(horizontal = 20.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (icon != null) {
-            Image(bitmap = icon, contentDescription = null, modifier = Modifier.size(56.dp))
-            Spacer(Modifier.width(16.dp))
-        }
-        Column {
-            Text(
-                text = "Abrir CarPlay",
-                color = CarColors.TextPrimary,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Text(
-                text = if (icon != null) "Con DiPlay" else "Toca para instalar DiPlay",
-                color = CarColors.TextSecondary,
-                fontSize = 16.sp,
-            )
         }
     }
 }
