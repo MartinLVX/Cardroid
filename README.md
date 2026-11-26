@@ -2,19 +2,21 @@
 
 Launcher para usar una tablet Android como pantalla del auto, pensado para la Redmi Pad SE en horizontal.
 
-## Qué hace (versión 0.1)
+## Qué hace (versión 0.2)
 
-- Reloj y fecha grandes.
-- Tarjeta de música: muestra la canción, el artista y la portada de lo que suene (Spotify, YouTube Music, etc.) con botones de anterior, reproducir/pausar y siguiente.
-- Botones grandes para CarPlay (abre [DiPlay](https://github.com/shihabal3amri/DiPlay)), Google Maps, Waze y Spotify. Si una app no está instalada, el botón lleva a descargarla.
-- Lista de todas las apps y acceso a Ajustes.
+- Mapa integrado (MapLibre con mapas de OpenStreetMap vía OpenFreeMap, gratis y sin clave) que sigue tu posición, con botones de acercar, alejar y centrar, y velocidad en km/h.
+- Tarjeta de clima de tu ubicación (Open-Meteo, sin clave).
+- Tarjeta de música con portada de fondo y controles (Spotify, YouTube Music, etc.).
+- Barra inferior con todas las apps, asistente de voz, accesos a CarPlay (DiPlay), Spotify, Waze y Google Maps si están instaladas, Ajustes, hora y batería.
+- Panel derecho con velocímetro por GPS, distancia del viaje, rumbo y botón para abrir CarPlay.
 - Mantiene la pantalla encendida y oculta las barras del sistema.
 
 ## Instalar en la tablet
 
 1. En la tablet, abre la página de [Releases](../../releases) y descarga `Cardroid.apk` (la versión de prueba está en la etiqueta `dev`).
 2. Ábrelo y permite instalar apps desde el navegador si Android lo pide.
-3. Para ponerlo como pantalla de inicio: Ajustes > Apps > Apps predeterminadas > Pantalla de inicio > Cardroid. También puedes abrirlo como una app normal.
+3. Acepta el permiso de ubicación (lo usan el mapa, el velocímetro y el clima).
+4. Para ponerlo como pantalla de inicio: Ajustes > Apps > Apps predeterminadas > Pantalla de inicio > Cardroid. También puedes abrirlo como una app normal.
 
 ### Activar la tarjeta de música
 

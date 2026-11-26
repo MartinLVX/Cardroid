@@ -27,12 +27,17 @@ data class Shortcut(
 
 object Shortcuts {
     const val DIPLAY = "com.shihab.diplay"
+    const val SPOTIFY = "com.spotify.music"
 
-    val home = listOf(
-        Shortcut("CarPlay", DIPLAY, "https://github.com/shihabal3amri/DiPlay/releases"),
-        Shortcut("Google Maps", "com.google.android.apps.maps", playStore("com.google.android.apps.maps")),
+    val carPlay = Shortcut("CarPlay", DIPLAY, "https://github.com/shihabal3amri/DiPlay/releases")
+
+    /** Apps in the bottom bar. Missing ones are hidden, except CarPlay. */
+    val dock = listOf(
+        carPlay,
+        Shortcut("Spotify", SPOTIFY, playStore(SPOTIFY)),
         Shortcut("Waze", "com.waze", playStore("com.waze")),
-        Shortcut("Spotify", "com.spotify.music", playStore("com.spotify.music")),
+        Shortcut("Google Maps", "com.google.android.apps.maps", playStore("com.google.android.apps.maps")),
+        Shortcut("YouTube Music", "com.google.android.apps.youtube.music", playStore("com.google.android.apps.youtube.music")),
     )
 
     private fun playStore(pkg: String) = "https://play.google.com/store/apps/details?id=$pkg"
@@ -57,6 +62,13 @@ object AppLauncher {
 
     fun openSettings(context: Context) {
         start(context, Intent(Settings.ACTION_SETTINGS))
+    }
+
+    /** Opens the voice assistant (Google Assistant or Gemini). */
+    fun openAssistant(context: Context) {
+        if (!start(context, Intent(Intent.ACTION_VOICE_COMMAND))) {
+            start(context, Intent(Intent.ACTION_ASSIST))
+        }
     }
 
     fun openNotificationAccessSettings(context: Context) {
