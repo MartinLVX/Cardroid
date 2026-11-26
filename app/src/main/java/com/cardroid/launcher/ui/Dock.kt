@@ -43,13 +43,15 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun Dock(refreshKey: Int, modifier: Modifier = Modifier) {
+fun Dock(refreshKey: Int, onLinkPhone: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     Row(
         modifier = modifier.padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         DockIcon(R.drawable.ic_mic, "Asistente de voz") { AppLauncher.openAssistant(context) }
+        Spacer(Modifier.width(8.dp))
+        DockIcon(R.drawable.ic_phone_link, "Enlazar iPhone", onLinkPhone)
 
         Row(
             modifier = Modifier.weight(1f),

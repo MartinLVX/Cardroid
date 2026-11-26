@@ -23,7 +23,13 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import com.cardroid.launcher.link.PhoneLink
 import com.cardroid.launcher.location.LocationTracker
+import com.cardroid.launcher.nav.Navigation
+import com.cardroid.launcher.nav.RecentPlaces
+import com.cardroid.launcher.ui.LinkPhonePanel
+import kotlinx.coroutines.launch
 import com.cardroid.launcher.map.CarMapState
 import com.cardroid.launcher.media.NowPlayingTracker
 import com.cardroid.launcher.ui.CardroidTheme
@@ -41,6 +47,12 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var media: NowPlayingTracker
     private lateinit var location: LocationTracker
+    private lateinit var recents: RecentPlaces
+    private lateinit var phoneLink: PhoneLink
+    private lateinit var navigation: Navigation
+    private val mapState = CarMapState()
+    private var showSearch by mutableStateOf(false)
+    private var showLinkPhone by mutableStateOf(false)
 
     /** Bumped every time the home screen comes back, to refresh app lists and icons. */
     private var resumeCount by mutableIntStateOf(0)
@@ -56,6 +68,14 @@ class MainActivity : ComponentActivity() {
         media = NowPlayingTracker(applicationContext)
         location = LocationTracker(applicationContext)
         hasLocationPermission = location.hasPermission()
+        recents = RecentPlaces(applicationContext)
+        phoneLink = PhoneLink(applicationContext)
+        navigation = Navigation(lifecycleScope, location, recents, mapState)
+
+        // Destinations shared from the iPhone arrive here while the launcher is alive.
+        lifecycleScope.launch {
+            phoneLink.listen { message -> navigation.handlePhoneMessage(message) }
+        }
 
         setContent {
             CardroidTheme {
@@ -64,7 +84,9 @@ class MainActivity : ComponentActivity() {
                 val currentLocation by location.location.collectAsStateWithLifecycle()
                 val speedKmh by location.speedKmh.collectAsStateWithLifecycle()
                 val tripMeters by location.tripMeters.collectAsStateWithLifecycle()
-                val mapState = remember { CarMapState() }
+                val trip by navigation.trip.collectAsStateWithLifecycle()
+                val notice by navigation.notice.collectAsStateWithLifecycle()
+                val recentPlaces by recents.items.collectAsStateWithLifecycle()
 
                 val permissionLauncher = rememberLauncherForActivityResult(
                     ActivityResultContracts.RequestMultiplePermissions()
@@ -98,8 +120,11 @@ class MainActivity : ComponentActivity() {
                     ?.takeIf { it.hasBearing() && speedKmh >= 5 }
                     ?.bearing
 
-                // A launcher must never close on Back.
-                BackHandler { }
+                // A launcher never closes on Back; Back only closes panels.
+                BackHandler {
+                    showSearch = false
+                    showLinkPhone = false
+                }
 
                 Box(Modifier.fillMaxSize()) {
                     HomeScreen(
@@ -112,6 +137,12 @@ class MainActivity : ComponentActivity() {
                             tripMeters = tripMeters,
                             bearing = bearing,
                             refreshKey = resumeCount,
+                            trip = trip,
+                            notice = notice,
+                            recents = recentPlaces,
+                            showSearch = showSearch,
+                            latitude = currentLocation?.latitude,
+                            longitude = currentLocation?.longitude,
                         ),
                         actions = HomeActions(
                             onPlayPause = media::playPause,
@@ -119,9 +150,26 @@ class MainActivity : ComponentActivity() {
                             onPrevious = media::previous,
                             onResetTrip = location::resetTrip,
                             onRequestLocation = requestLocation,
+                            onOpenSearch = { showSearch = true },
+                            onCloseSearch = { showSearch = false },
+                            onPickPlace = { place ->
+                                showSearch = false
+                                navigation.navigateTo(place)
+                            },
+                            onStartTrip = navigation::start,
+                            onCancelTrip = navigation::cancel,
+                            onRetryTrip = navigation::retry,
+                            onLinkPhone = { showLinkPhone = true },
                         ),
                         mapState = mapState,
                     )
+
+                    if (showLinkPhone) {
+                        LinkPhonePanel(
+                            shortcutUrl = phoneLink.shortcutUrl,
+                            onClose = { showLinkPhone = false },
+                        )
+                    }
                 }
             }
         }

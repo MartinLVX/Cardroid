@@ -17,6 +17,10 @@ import androidx.compose.ui.unit.dp
 import com.cardroid.launcher.map.CarMap
 import com.cardroid.launcher.map.CarMapState
 import com.cardroid.launcher.media.NowPlaying
+import com.cardroid.launcher.nav.Place
+import com.cardroid.launcher.nav.Trip
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.Alignment
 import com.cardroid.launcher.weather.Weather
 
 /** Everything the home screen shows, gathered in one place. */
@@ -29,6 +33,12 @@ data class HomeState(
     val tripMeters: Double,
     val bearing: Float?,
     val refreshKey: Int,
+    val trip: Trip?,
+    val notice: String?,
+    val recents: List<Place>,
+    val showSearch: Boolean,
+    val latitude: Double?,
+    val longitude: Double?,
 )
 
 class HomeActions(
@@ -37,6 +47,13 @@ class HomeActions(
     val onPrevious: () -> Unit,
     val onResetTrip: () -> Unit,
     val onRequestLocation: () -> Unit,
+    val onOpenSearch: () -> Unit,
+    val onCloseSearch: () -> Unit,
+    val onPickPlace: (Place) -> Unit,
+    val onStartTrip: () -> Unit,
+    val onCancelTrip: () -> Unit,
+    val onRetryTrip: () -> Unit,
+    val onLinkPhone: () -> Unit,
 )
 
 @Composable
@@ -71,7 +88,38 @@ fun HomeScreen(state: HomeState, actions: HomeActions, mapState: CarMapState) {
                     speedKmh = state.speedKmh,
                     hasLocationPermission = state.hasLocationPermission,
                     onRequestLocation = actions.onRequestLocation,
+                    onSearch = actions.onOpenSearch,
                 )
+                val panelModifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(16.dp)
+                    .width(460.dp)
+                if (state.showSearch) {
+                    SearchPanel(
+                        recents = state.recents,
+                        nearLat = state.latitude,
+                        nearLon = state.longitude,
+                        onPick = actions.onPickPlace,
+                        onClose = actions.onCloseSearch,
+                        modifier = panelModifier.fillMaxHeight(),
+                    )
+                } else if (state.trip != null) {
+                    RouteCard(
+                        trip = state.trip,
+                        onStart = actions.onStartTrip,
+                        onCancel = actions.onCancelTrip,
+                        onRetry = actions.onRetryTrip,
+                        modifier = panelModifier,
+                    )
+                }
+                state.notice?.let {
+                    NoticeBanner(
+                        text = it,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 20.dp),
+                    )
+                }
             }
             Row(
                 modifier = Modifier
@@ -95,6 +143,7 @@ fun HomeScreen(state: HomeState, actions: HomeActions, mapState: CarMapState) {
             }
             Dock(
                 refreshKey = state.refreshKey,
+                onLinkPhone = actions.onLinkPhone,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(72.dp),

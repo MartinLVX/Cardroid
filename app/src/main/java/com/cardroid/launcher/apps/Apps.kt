@@ -49,6 +49,9 @@ object AppLauncher {
         }
     }
 
+    fun openUri(context: Context, uri: String): Boolean =
+        start(context, Intent(Intent.ACTION_VIEW, Uri.parse(uri)))
+
     fun openSettings(context: Context) {
         start(context, Intent(Settings.ACTION_SETTINGS))
     }

@@ -32,6 +32,7 @@ fun MapOverlay(
     speedKmh: Int,
     hasLocationPermission: Boolean,
     onRequestLocation: () -> Unit,
+    onSearch: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         if (!hasLocationPermission) {
@@ -50,6 +51,13 @@ fun MapOverlay(
                 )
             }
         }
+
+        MapButton(
+            icon = R.drawable.ic_search,
+            description = "Buscar destino",
+            modifier = Modifier.align(Alignment.TopEnd),
+            onClick = onSearch,
+        )
 
         Column(
             modifier = Modifier.align(Alignment.BottomEnd),
@@ -90,10 +98,11 @@ private fun MapButton(
     @DrawableRes icon: Int,
     description: String,
     highlighted: Boolean = false,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .size(68.dp)
             .clip(CircleShape)
             .background(if (highlighted) Color(0xFF0B57D0) else CarColors.MapButton)

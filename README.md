@@ -2,9 +2,11 @@
 
 Launcher para usar una tablet Android como pantalla del auto, pensado para la Redmi Pad SE en horizontal.
 
-## Qué hace (versión 0.2)
+## Qué hace (versión 0.3)
 
 - Mapa integrado (MapLibre con mapas de OpenStreetMap vía OpenFreeMap, gratis y sin clave) que sigue tu posición, con botones de acercar, alejar y centrar, y velocidad en km/h.
+- Buscador de destinos (Photon, datos de OpenStreetMap) con destinos recientes, ruta dibujada en el mapa con distancia y hora de llegada (OSRM), y botones para seguir la ruta en Waze o Google Maps.
+- Destinos enviados desde el iPhone con un Atajo de iOS (vía ntfy.sh, en un canal secreto). Las instrucciones están en el botón del teléfono de la barra inferior.
 - Tarjeta de clima de tu ubicación (Open-Meteo, sin clave).
 - Tarjeta de música con portada de fondo y controles (Spotify, YouTube Music, etc.).
 - Barra inferior con asistente de voz, accesos a Spotify, Waze, Google Maps y YouTube Music si están instaladas, Ajustes, hora y batería.
