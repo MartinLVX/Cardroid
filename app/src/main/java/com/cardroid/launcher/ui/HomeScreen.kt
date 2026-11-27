@@ -54,6 +54,7 @@ class HomeActions(
     val onCancelTrip: () -> Unit,
     val onRetryTrip: () -> Unit,
     val onLinkPhone: () -> Unit,
+    val onOpenPlayer: () -> Unit,
 )
 
 @Composable
@@ -138,6 +139,7 @@ fun HomeScreen(state: HomeState, actions: HomeActions, mapState: CarMapState) {
                     onPlayPause = actions.onPlayPause,
                     onNext = actions.onNext,
                     onPrevious = actions.onPrevious,
+                    onOpenPlayer = actions.onOpenPlayer,
                     modifier = Modifier.weight(1.4f),
                 )
             }

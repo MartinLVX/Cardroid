@@ -94,6 +94,7 @@ fun MusicCard(
     onPlayPause: () -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
+    onOpenPlayer: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -103,9 +104,7 @@ fun MusicCard(
             .fillMaxHeight()
             .clip(CardShape)
             .background(CarColors.Surface)
-            .clickable {
-                AppLauncher.open(context, nowPlaying?.packageName ?: Shortcuts.SPOTIFY)
-            },
+            .clickable(onClick = onOpenPlayer),
     ) {
         if (art != null) {
             Image(
@@ -140,7 +139,7 @@ fun MusicCard(
             }
             val subtitle = when {
                 !hasAccess -> "Toca aquí para activar el acceso"
-                nowPlaying == null -> "Toca para abrir Spotify"
+                nowPlaying == null -> "Pon música desde Spotify en tu iPhone"
                 else -> nowPlaying.artist
             }
             Column(

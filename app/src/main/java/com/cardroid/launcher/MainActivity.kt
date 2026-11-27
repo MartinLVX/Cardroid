@@ -31,7 +31,12 @@ import com.cardroid.launcher.nav.RecentPlaces
 import com.cardroid.launcher.ui.LinkPhonePanel
 import kotlinx.coroutines.launch
 import com.cardroid.launcher.map.CarMapState
+import com.cardroid.launcher.apps.AppLauncher
+import com.cardroid.launcher.apps.Shortcuts
+import com.cardroid.launcher.media.MediaLibrary
 import com.cardroid.launcher.media.NowPlayingTracker
+import com.cardroid.launcher.ui.MusicPlayer
+import com.cardroid.launcher.ui.PlayerActions
 import com.cardroid.launcher.ui.CardroidTheme
 import com.cardroid.launcher.ui.HomeActions
 import com.cardroid.launcher.ui.HomeScreen
@@ -53,6 +58,8 @@ class MainActivity : ComponentActivity() {
     private val mapState = CarMapState()
     private var showSearch by mutableStateOf(false)
     private var showLinkPhone by mutableStateOf(false)
+    private var showPlayer by mutableStateOf(false)
+    private lateinit var library: MediaLibrary
 
     /** Bumped every time the home screen comes back, to refresh app lists and icons. */
     private var resumeCount by mutableIntStateOf(0)
@@ -69,6 +76,7 @@ class MainActivity : ComponentActivity() {
         location = LocationTracker(applicationContext)
         hasLocationPermission = location.hasPermission()
         recents = RecentPlaces(applicationContext)
+        library = MediaLibrary(applicationContext)
         phoneLink = PhoneLink(applicationContext)
         navigation = Navigation(lifecycleScope, location, recents, mapState)
 
@@ -87,6 +95,7 @@ class MainActivity : ComponentActivity() {
                 val trip by navigation.trip.collectAsStateWithLifecycle()
                 val notice by navigation.notice.collectAsStateWithLifecycle()
                 val recentPlaces by recents.items.collectAsStateWithLifecycle()
+                val libraryState by library.state.collectAsStateWithLifecycle()
 
                 val permissionLauncher = rememberLauncherForActivityResult(
                     ActivityResultContracts.RequestMultiplePermissions()
@@ -122,8 +131,20 @@ class MainActivity : ComponentActivity() {
 
                 // A launcher never closes on Back; Back only closes panels.
                 BackHandler {
-                    showSearch = false
-                    showLinkPhone = false
+                    when {
+                        showPlayer -> if (!library.back()) showPlayer = false
+                        else -> {
+                            showSearch = false
+                            showLinkPhone = false
+                        }
+                    }
+                    Unit
+                }
+
+                // The library follows whichever app is playing (Spotify by default).
+                val playerPackage = nowPlaying?.packageName ?: Shortcuts.SPOTIFY
+                LaunchedEffect(showPlayer, playerPackage) {
+                    if (showPlayer) library.connect(playerPackage) else library.disconnect()
                 }
 
                 Box(Modifier.fillMaxSize()) {
@@ -160,9 +181,31 @@ class MainActivity : ComponentActivity() {
                             onCancelTrip = navigation::cancel,
                             onRetryTrip = navigation::retry,
                             onLinkPhone = { showLinkPhone = true },
+                            onOpenPlayer = { showPlayer = true },
                         ),
                         mapState = mapState,
                     )
+
+                    if (showPlayer) {
+                        MusicPlayer(
+                            nowPlaying = nowPlaying,
+                            hasAccess = hasMediaAccess,
+                            library = libraryState,
+                            actions = PlayerActions(
+                                onClose = { showPlayer = false },
+                                onPlayPause = media::playPause,
+                                onNext = media::next,
+                                onPrevious = media::previous,
+                                onSeek = media::seekTo,
+                                onQueueItem = media::skipToQueueItem,
+                                onLibraryItem = library::open,
+                                onLibraryBack = { library.back() },
+                                onGrantAccess = {
+                                    AppLauncher.openNotificationAccessSettings(applicationContext)
+                                },
+                            ),
+                        )
+                    }
 
                     if (showLinkPhone) {
                         LinkPhonePanel(

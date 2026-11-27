@@ -16,7 +16,7 @@ android {
         minSdk = 29
         targetSdk = 35
         versionCode = buildNumber
-        versionName = "0.3.$buildNumber"
+        versionName = "0.4.$buildNumber"
 
         // Tablets are ARM; skipping x86 map libraries keeps the APK smaller.
         ndk {
