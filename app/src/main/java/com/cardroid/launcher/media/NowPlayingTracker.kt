@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.media.AudioManager
 import android.media.MediaMetadata
 import android.media.session.MediaController
+import android.media.session.MediaSession
 import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
 import android.os.Handler
@@ -17,13 +18,35 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+data class QueueEntry(
+    val id: Long,
+    val title: String,
+    val subtitle: String,
+    val art: Bitmap?,
+)
+
 data class NowPlaying(
     val title: String,
     val artist: String,
     val art: Bitmap?,
     val isPlaying: Boolean,
     val packageName: String,
-)
+    val album: String = "",
+    val durationMs: Long = 0,
+    val positionMs: Long = 0,
+    /** SystemClock.elapsedRealtime() when positionMs was measured. */
+    val positionUpdatedAt: Long = 0,
+    val speed: Float = 1f,
+    val queue: List<QueueEntry> = emptyList(),
+    val activeQueueId: Long = -1,
+) {
+    /** Where playback is right now, moving forward while it plays. */
+    fun currentPositionMs(now: Long = SystemClock.elapsedRealtime()): Long {
+        val elapsed = if (isPlaying) ((now - positionUpdatedAt) * speed).toLong() else 0L
+        val position = positionMs + elapsed
+        return if (durationMs > 0) position.coerceIn(0, durationMs) else position.coerceAtLeast(0)
+    }
+}
 
 /** Follows whichever app is playing audio (Spotify, YouTube Music, etc.). */
 class NowPlayingTracker(private val context: Context) {
@@ -45,6 +68,7 @@ class NowPlayingTracker(private val context: Context) {
     private val controllerCallback = object : MediaController.Callback() {
         override fun onMetadataChanged(metadata: MediaMetadata?) = publish()
         override fun onPlaybackStateChanged(state: PlaybackState?) = publish()
+        override fun onQueueChanged(queue: MutableList<MediaSession.QueueItem>?) = publish()
         override fun onSessionDestroyed() = refreshSessions()
     }
 
@@ -97,6 +121,14 @@ class NowPlayingTracker(private val context: Context) {
     fun previous() {
         controller?.transportControls?.skipToPrevious()
             ?: sendMediaKey(KeyEvent.KEYCODE_MEDIA_PREVIOUS)
+    }
+
+    fun seekTo(positionMs: Long) {
+        controller?.transportControls?.seekTo(positionMs)
+    }
+
+    fun skipToQueueItem(id: Long) {
+        controller?.transportControls?.skipToQueueItem(id)
     }
 
     /** Works without notification access, so the buttons always do something. */
@@ -153,12 +185,32 @@ class NowPlayingTracker(private val context: Context) {
         val art = metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
             ?: metadata?.getBitmap(MediaMetadata.METADATA_KEY_ART)
             ?: metadata?.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON)
+        val state = c.playbackState
+        val queue = try {
+            c.queue.orEmpty().take(50).map { item ->
+                QueueEntry(
+                    id = item.queueId,
+                    title = item.description.title?.toString().orEmpty(),
+                    subtitle = item.description.subtitle?.toString().orEmpty(),
+                    art = item.description.iconBitmap,
+                )
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
         _nowPlaying.value = NowPlaying(
             title = title,
             artist = artist,
             art = art,
-            isPlaying = c.playbackState?.state == PlaybackState.STATE_PLAYING,
+            isPlaying = state?.state == PlaybackState.STATE_PLAYING,
             packageName = c.packageName,
+            album = metadata?.getString(MediaMetadata.METADATA_KEY_ALBUM).orEmpty(),
+            durationMs = metadata?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0L,
+            positionMs = state?.position ?: 0L,
+            positionUpdatedAt = state?.lastPositionUpdateTime ?: SystemClock.elapsedRealtime(),
+            speed = state?.playbackSpeed?.takeIf { it > 0f } ?: 1f,
+            queue = queue,
+            activeQueueId = state?.activeQueueItemId ?: -1,
         )
     }
 }

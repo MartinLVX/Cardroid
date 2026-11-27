@@ -2,19 +2,23 @@
 
 Launcher para usar una tablet Android como pantalla del auto, pensado para la Redmi Pad SE en horizontal.
 
-## Qué hace (versión 0.1)
+## Qué hace (versión 0.4)
 
-- Reloj y fecha grandes.
-- Tarjeta de música: muestra la canción, el artista y la portada de lo que suene (Spotify, YouTube Music, etc.) con botones de anterior, reproducir/pausar y siguiente.
-- Botones grandes para CarPlay (abre [DiPlay](https://github.com/shihabal3amri/DiPlay)), Google Maps, Waze y Spotify. Si una app no está instalada, el botón lleva a descargarla.
-- Lista de todas las apps y acceso a Ajustes.
+- Mapa integrado (MapLibre con mapas de OpenStreetMap vía OpenFreeMap, gratis y sin clave) que sigue tu posición, con botones de acercar, alejar y centrar, y velocidad en km/h.
+- Buscador de destinos (Photon, datos de OpenStreetMap) con destinos recientes, ruta dibujada en el mapa con distancia y hora de llegada (OSRM), y botones para seguir la ruta en Waze o Google Maps.
+- Destinos enviados desde el iPhone con un Atajo de iOS (vía ntfy.sh, en un canal secreto). Las instrucciones están en el botón del teléfono de la barra inferior.
+- Tarjeta de clima de tu ubicación (Open-Meteo, sin clave).
+- Tarjeta de música con portada de fondo y controles (Spotify, YouTube Music, etc.). Al tocarla abre el reproductor de pantalla completa de Cardroid: portada grande, barra de progreso, cola "A continuación" y biblioteca cuando la app de música lo permite.
+- Barra inferior con asistente de voz, accesos a Spotify, Waze, Google Maps y YouTube Music si están instaladas, Ajustes, hora y batería.
+- Panel derecho con velocímetro por GPS, distancia del viaje y rumbo.
 - Mantiene la pantalla encendida y oculta las barras del sistema.
 
 ## Instalar en la tablet
 
 1. En la tablet, abre la página de [Releases](../../releases) y descarga `Cardroid.apk` (la versión de prueba está en la etiqueta `dev`).
 2. Ábrelo y permite instalar apps desde el navegador si Android lo pide.
-3. Para ponerlo como pantalla de inicio: Ajustes > Apps > Apps predeterminadas > Pantalla de inicio > Cardroid. También puedes abrirlo como una app normal.
+3. Acepta el permiso de ubicación (lo usan el mapa, el velocímetro y el clima).
+4. Para ponerlo como pantalla de inicio: Ajustes > Apps > Apps predeterminadas > Pantalla de inicio > Cardroid. También puedes abrirlo como una app normal.
 
 ### Activar la tarjeta de música
 
